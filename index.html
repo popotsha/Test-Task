@@ -8,18 +8,22 @@
 </head>
 <body>
     <div class="quiz-container">
-        <progress id="progress-bar" value="0" max="100"></progress>
-        <div class="question">1. How many planets are in the solar system?</div>
-        <div class="options">
-            <div class="option" data-answer="8" onclick="checkAnswer(this)">8</div>
-            <div class="option" data-answer="9" onclick="checkAnswer(this)">9</div>
-            <div class="option" data-answer="10" onclick="checkAnswer(this)">10</div>
+        <div class="settings">
+            <label for="difficulty">Select difficulty:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button class="theme-toggle">Toggle Dark Theme</button>
         </div>
-        <div class="counter">Question <span id="current-question">1</span> of 8</div>
-        <button class="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
-        <div id="result"></div>
-        <div id="timer"></div>
-        <button class="theme-btn" onclick="toggleTheme()">Toggle Theme</button>
+        <div class="question"></div>
+        <div class="options"></div>
+        <div class="progress-container">
+            <div class="progress"></div>
+        </div>
+        <div class="counter"></div>
+        <button class="next-btn" disabled>Next</button>
     </div>
 
     <script src="script.js"></script>

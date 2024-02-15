@@ -60,6 +60,15 @@ body {
     background-color: black;
     color: white;
 }
+.progress-container {
+    margin-bottom: 20px;
+}
+
+.progress {
+    height: 10px;
+    background-color: #ccc;
+    width: 0;
+}
 
 
 @media only screen and (max-width: 600px) {

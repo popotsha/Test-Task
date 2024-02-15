@@ -1,159 +1,174 @@
-const questions = [
-    {
-        question: "How many planets are in the solar system?",
-        options: ["8", "9", "10"],
-        correctAnswer: "8"
-    },
-    {
-        question: "What is the freezing point of water?",
-        options: ["0", "-5", "-6"],
-        correctAnswer: "0"
-    },
-    {
-        question: "What is the longest river in the world?",
-        options: ["Nile", "Amazon", "Yangtze"],
-        correctAnswer: "Nile"
-    },
-    {
-        question: "How many chromosomes are in the human genome?",
-        options: ["42", "44", "46"],
-        correctAnswer: "46"
-    },
-    {
-        question: "Which of these characters are friends with Harry Potter?",
-        options: ["Ron Weasley", "Draco Malfoy", "Hermione Granger"],
-        correctAnswer: ["Ron Weasley", "Hermione Granger"]
-    },
-    {
-        question: "What is the capital of Canada?",
-        options: ["Toronto", "Ottawa", "Vancouver"],
-        correctAnswer: "Ottawa"
-    },
-    {
-        question: "What is the Jewish New Year called?",
-        options: ["Hanukkah", "Yom Kippur", "Rosh Hashanah"],
-        correctAnswer: "Rosh Hashanah"
-    },
-    {
-        question: "Which of these are prime numbers?",
-        options: ["2", "4", "6", "11", "12"],
-        correctAnswer: ["2", "11"]
-    }
-];
+const questions = {
+    easy: [
+        {
+            question: "How many planets are in the solar system?",
+            options: ["8", "9", "10"],
+            correctAnswer: "8"
+        },
+        {
+            question: "What is the freezing point of water?",
+            options: ["0", "-5", "-6"],
+            correctAnswer: "0"
+        },
+        {
+            question: "What is the capital of France?",
+            options: ["Paris", "Rome", "Berlin"],
+            correctAnswer: "Paris"
+        },
+        {
+            question: "What is the capital of Australia?",
+            options: ["Sydney", "Melbourne", "Canberra"],
+            correctAnswer: "Canberra"
+        },
+        {
+            question: "What is the currency of Japan?",
+            options: ["Yuan", "Yen", "Won"],
+            correctAnswer: "Yen"
+        }
+    ],
+    medium: [
+        {
+            question: "What is the longest river in the world?",
+            options: ["Nile", "Amazon", "Yangtze"],
+            correctAnswer: "Nile"
+        },
+        {
+            question: "Which planet is known as the Red Planet?",
+            options: ["Mars", "Venus", "Jupiter"],
+            correctAnswer: "Mars"
+        },
+        {
+            question: "Who painted the Mona Lisa?",
+            options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso"],
+            correctAnswer: "Leonardo da Vinci"
+        },
+        {
+            question: "What is the largest mammal?",
+            options: ["Elephant", "Blue Whale", "Giraffe"],
+            correctAnswer: "Blue Whale"
+        },
+        {
+            question: "Who wrote 'Romeo and Juliet'?",
+            options: ["William Shakespeare", "Jane Austen", "Charles Dickens"],
+            correctAnswer: "William Shakespeare"
+        }
+    ],
+    hard: [
+        {
+            question: "What is the capital of Canada?",
+            options: ["Toronto", "Ottawa", "Vancouver"],
+            correctAnswer: "Ottawa"
+        },
+        {
+            question: "What is the chemical symbol for gold?",
+            options: ["Au", "Ag", "Fe"],
+            correctAnswer: "Au"
+        },
+        {
+            question: "What is the tallest mountain in the world?",
+            options: ["Mount Everest", "K2", "Kangchenjunga"],
+            correctAnswer: "Mount Everest"
+        },
+        {
+            question: "Who discovered penicillin?",
+            options: ["Alexander Fleming", "Marie Curie", "Isaac Newton"],
+            correctAnswer: "Alexander Fleming"
+        },
+        {
+            question: "In which year did the Titanic sink?",
+            options: ["1912", "1907", "1921"],
+            correctAnswer: "1912"
+        }
+    ]
+};
 
-function toggleTheme() {
-    const body = document.body;
-    body.classList.toggle('dark-theme');
-    const quizContainer = document.querySelector('.quiz-container');
-    quizContainer.classList.toggle('dark-theme');
-}
 
-let currentQuestionIndex = 0;
+let currentQuestion = 0;
 let score = 0;
-let timer;
-let timeInSeconds = 0;
-let questionTimes = []; // Массив для хранения времени на каждый вопрос
+let startTime, endTime;
+let selectedDifficulty = 'easy';
 
+const quizContainer = document.querySelector('.quiz-container');
 const questionElement = document.querySelector('.question');
 const optionsElement = document.querySelector('.options');
 const counterElement = document.querySelector('.counter');
 const nextButton = document.querySelector('.next-btn');
-const resultElement = document.getElementById('result');
-const timerElement = document.getElementById('timer');
+const difficultySelect = document.getElementById('difficulty');
+const progressElement = document.querySelector('.progress');
 
-function startTimer() {
-    timer = setInterval(updateTime, 1000);
-}
-
-function stopTimer() {
-    clearInterval(timer);
-}
-
-function updateTime() {
-    timeInSeconds++;
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function resetTimer() {
-    stopTimer();
-    timeInSeconds = 0;
-    timerElement.textContent = '00:00';
-}
-
-function displayQuestion(question) {
-    questionElement.textContent = question.question;
+function displayQuestion() {
+    const q = questions[selectedDifficulty][currentQuestion];
+    questionElement.textContent = q.question;
     optionsElement.innerHTML = '';
-    question.options.forEach(option => {
+
+    q.options.forEach(option => {
         const optionElement = document.createElement('div');
-        optionElement.textContent = option;
         optionElement.classList.add('option');
-        optionElement.onclick = () => checkAnswer(optionElement);
+        optionElement.textContent = option;
+        optionElement.addEventListener('click', () => checkAnswer(option));
         optionsElement.appendChild(optionElement);
     });
-    startTimer();
+
+    counterElement.textContent = `Question ${currentQuestion + 1} of ${questions[selectedDifficulty].length}`;
+    updateProgress();
 }
 
-function checkAnswer(selectedOption) {
-    const selectedAnswer = selectedOption.textContent;
-    const correctAnswer = questions[currentQuestionIndex].correctAnswer;
-    const isCorrect = selectedAnswer === correctAnswer;
-    const resultColor = isCorrect ? 'green' : 'red';
-
-    optionsElement.querySelectorAll('.option').forEach(option => {
-        option.style.backgroundColor = option.textContent === correctAnswer ? 'green' : 'red';
-        option.style.color = 'white';
-        option.onclick = null;
-    });
-
-    if (isCorrect) {
+function checkAnswer(answer) {
+    const q = questions[selectedDifficulty][currentQuestion];
+    if (answer === q.correctAnswer) {
         score++;
+        optionsElement.childNodes.forEach(option => {
+            if (option.textContent === answer) {
+                option.style.backgroundColor = '#5cb85c';
+            }
+        });
+    } else {
+        optionsElement.childNodes.forEach(option => {
+            if (option.textContent === answer) {
+                option.style.backgroundColor = '#d9534f';
+            }
+            if (option.textContent === q.correctAnswer) {
+                option.style.backgroundColor = '#5cb85c';
+            }
+        });
     }
-
-    questionTimes[currentQuestionIndex] = timeInSeconds; // Сохранение времени для текущего вопроса
-    resetTimer();
     nextButton.disabled = false;
 }
 
-function updateProgressBar() {
-    const progressBar = document.getElementById('progress-bar');
-    const progress = (currentQuestionIndex + 1) / questions.length * 100;
-    progressBar.value = progress;
-}
-
 function nextQuestion() {
-    stopTimer();
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        displayQuestion(questions[currentQuestionIndex]);
-        document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+    currentQuestion++;
+    if (currentQuestion < questions[selectedDifficulty].length) {
+        displayQuestion();
         nextButton.disabled = true;
-        updateProgressBar(); // Обновление шкалы прогресса
     } else {
-        showResult();
+        endTime = new Date();
+        const timeSpent = (endTime - startTime) / 1000;
+        quizContainer.innerHTML = `
+            <h2>Your score: ${score} out of ${questions[selectedDifficulty].length}</h2>
+            <p>Time spent: ${timeSpent} seconds</p>
+            <button onclick="location.reload()">Restart Quiz</button>
+        `;
     }
 }
 
-
-function getTotalTime() {
-    return questionTimes.reduce((totalTime, time) => totalTime + time, 0);
+function updateProgress() {
+    const progress = ((currentQuestion + 1) / questions[selectedDifficulty].length) * 100;
+    progressElement.style.width = `${progress}%`;
 }
 
-function showResult() {
-    questionElement.textContent = '';
-    optionsElement.innerHTML = '';
-    counterElement.textContent = '';
-    nextButton.style.display = 'none';
-    const totalTime = getTotalTime();
-    resultElement.textContent = `You scored ${score} out of ${questions.length}! Total time: ${formatTime(totalTime)}`;
-}
+nextButton.addEventListener('click', nextQuestion);
 
-function formatTime(timeInSeconds) {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
+difficultySelect.addEventListener('change', function() {
+    selectedDifficulty = this.value;
+    currentQuestion = 0;
+    score = 0;
+    displayQuestion();
+});
 
-displayQuestion(questions[currentQuestionIndex]);
-resetTimer();
+document.querySelector('.theme-toggle').addEventListener('click', function() {
+    document.body.classList.toggle('dark-theme');
+    quizContainer.classList.toggle('dark-theme');
+});
+
+displayQuestion();
+startTime = new Date();
