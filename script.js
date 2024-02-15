@@ -41,15 +41,46 @@ const questions = [
     }
 ];
 
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle('dark-theme');
+    const quizContainer = document.querySelector('.quiz-container');
+    quizContainer.classList.toggle('dark-theme');
+}
 
 let currentQuestionIndex = 0;
 let score = 0;
+let timer;
+let timeInSeconds = 0;
+let questionTimes = []; // Массив для хранения времени на каждый вопрос
 
 const questionElement = document.querySelector('.question');
 const optionsElement = document.querySelector('.options');
 const counterElement = document.querySelector('.counter');
 const nextButton = document.querySelector('.next-btn');
 const resultElement = document.getElementById('result');
+const timerElement = document.getElementById('timer');
+
+function startTimer() {
+    timer = setInterval(updateTime, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timer);
+}
+
+function updateTime() {
+    timeInSeconds++;
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function resetTimer() {
+    stopTimer();
+    timeInSeconds = 0;
+    timerElement.textContent = '00:00';
+}
 
 function displayQuestion(question) {
     questionElement.textContent = question.question;
@@ -61,6 +92,7 @@ function displayQuestion(question) {
         optionElement.onclick = () => checkAnswer(optionElement);
         optionsElement.appendChild(optionElement);
     });
+    startTimer();
 }
 
 function checkAnswer(selectedOption) {
@@ -79,18 +111,33 @@ function checkAnswer(selectedOption) {
         score++;
     }
 
+    questionTimes[currentQuestionIndex] = timeInSeconds; // Сохранение времени для текущего вопроса
+    resetTimer();
     nextButton.disabled = false;
 }
 
+function updateProgressBar() {
+    const progressBar = document.getElementById('progress-bar');
+    const progress = (currentQuestionIndex + 1) / questions.length * 100;
+    progressBar.value = progress;
+}
+
 function nextQuestion() {
+    stopTimer();
     currentQuestionIndex++;
     if (currentQuestionIndex < questions.length) {
         displayQuestion(questions[currentQuestionIndex]);
         document.getElementById('current-question').textContent = currentQuestionIndex + 1;
         nextButton.disabled = true;
+        updateProgressBar(); // Обновление шкалы прогресса
     } else {
         showResult();
     }
+}
+
+
+function getTotalTime() {
+    return questionTimes.reduce((totalTime, time) => totalTime + time, 0);
 }
 
 function showResult() {
@@ -98,7 +145,15 @@ function showResult() {
     optionsElement.innerHTML = '';
     counterElement.textContent = '';
     nextButton.style.display = 'none';
-    resultElement.textContent = `You scored ${score} out of ${questions.length}!`;
+    const totalTime = getTotalTime();
+    resultElement.textContent = `You scored ${score} out of ${questions.length}! Total time: ${formatTime(totalTime)}`;
 }
-  
+
+function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
 displayQuestion(questions[currentQuestionIndex]);
+resetTimer();

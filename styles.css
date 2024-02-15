@@ -56,6 +56,12 @@ body {
     font-weight: bold;
 }
 
+.dark-theme {
+    background-color: black;
+    color: white;
+}
+
+
 @media only screen and (max-width: 600px) {
     .quiz-container {
         padding: 10px;
